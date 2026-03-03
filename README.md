@@ -1,4 +1,4 @@
-# Go Users API 🐹 ![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=flat&logo=go&logoColor=white)
+# Go Users API ![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=flat&logo=go&logoColor=white)
 
 A simple and lightweight RESTful API for managing users, built entirely with Go. 
 
