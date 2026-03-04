@@ -1,57 +1,112 @@
-# Go Users API ![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=flat&logo=go&logoColor=white)
+# User CRUD API (Go + SQLite)
 
-A simple and lightweight RESTful API for managing users, built entirely with Go. 
+A lightweight REST API for user management built with Go, using real SQLite persistence through `zombiezen.com/go/sqlite`.
 
-This project was created to practice Go fundamentals, HTTP routing, and concurrent in-memory data management without relying on heavy web frameworks.
+## Overview
 
-## 🚀 Features
+- In-memory storage was replaced with SQLite persistence.
+- API contract remains the same: endpoints, request payloads, and response shapes were preserved.
+- SQL queries use parameter binding (`?1`, `?2`, etc.) to prevent SQL injection.
 
-* **CRUD Operations:** Create, Read, Update, and Delete users.
-* **In-Memory Storage:** Uses a Go map protected by a `sync.RWMutex` for safe, concurrent access.
-* **Standard Library:** Built utilizing Go's native `net/http` package (taking advantage of Go 1.22+ routing features).
-* **UUIDs:** Integrates `google/uuid` for generating unique user IDs.
+## Tech Stack
 
-## 📋 Prerequisites
+- Go
+- `net/http` (native Go 1.22+ routing)
+- `github.com/google/uuid`
+- `zombiezen.com/go/sqlite`
 
-* [Go](https://go.dev/dl/) version **1.22** or higher (required for the new `http.ServeMux` path wildcards).
+## Database
 
-## 🛠️ Getting Started
+- SQLite file: `users.db`
+- SQLite URI: `file:users.db`
+- The database file is created in the process working directory.
+- In debug (`go run main.go` from project root), `users.db` is created next to `main.go`.
+- For a compiled binary, `users.db` is created in the directory where the binary is executed.
 
-1. **Clone the repository:**
-   ```bash
-   git clone [https://github.com/yourusername/go-users-api.git](https://github.com/yourusername/go-users-api.git)
-   cd go-users-api
+### Startup Schema
 
+```sql
+CREATE TABLE IF NOT EXISTS users (
+    id TEXT PRIMARY KEY,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    biography TEXT NOT NULL
+);
+```
 
-2. **Install the dependencies:**
+## Getting Started
+
+1. Install dependencies:
+
 ```bash
 go mod tidy
-
 ```
 
+2. Run the API:
 
-3. **Run the server:**
 ```bash
 go run main.go
-
 ```
 
+Server URL: `http://localhost:8080`
 
-*The server will start running on `http://localhost:8080`.*
-
-## 🛣️ API Endpoints
+## API Endpoints
 
 | Method | Endpoint | Description |
 | --- | --- | --- |
-| `POST` | `/api/users` | Create a new user |
-| `GET` | `/api/users` | Retrieve a list of all users |
-| `GET` | `/api/users/{id}` | Retrieve a specific user by ID |
-| `PUT` | `/api/users/{id}` | Update a specific user by ID |
-| `DELETE` | `/api/users/{id}` | Delete a specific user by ID |
+| `POST` | `/api/users` | Create a user |
+| `GET` | `/api/users` | List all users |
+| `GET` | `/api/users/{id}` | Get a user by ID |
+| `PUT` | `/api/users/{id}` | Update a user by ID |
+| `DELETE` | `/api/users/{id}` | Delete a user by ID |
 
-### 📄 User JSON Object Example
+## Quick cURL Test Flow
 
-When creating or updating a user, send a JSON body like this:
+Use the commands below to test the API end-to-end.
+
+1. Create a user:
+
+```bash
+curl -X POST http://localhost:8080/api/users \
+  -H "Content-Type: application/json" \
+  -d '{
+    "first_name": "John",
+    "last_name": "Doe",
+    "biography": "Software developer currently learning Go and building REST APIs."
+  }'
+```
+
+2. List users:
+
+```bash
+curl http://localhost:8080/api/users
+```
+
+3. Get one user by ID (replace `USER_ID`):
+
+```bash
+curl http://localhost:8080/api/users/USER_ID
+```
+
+4. Update a user (replace `USER_ID`):
+
+```bash
+curl -X PUT http://localhost:8080/api/users/USER_ID \
+  -H "Content-Type: application/json" \
+  -d '{
+    "first_name": "Johnny",
+    "last_name": "Doe",
+    "biography": "Software developer focused on Go, SQLite, and clean API design."
+  }'
+```
+
+5. Delete a user (replace `USER_ID`):
+
+```bash
+curl -X DELETE http://localhost:8080/api/users/USER_ID
+```
+
+## Example Payload
 
 ```json
 {
@@ -59,5 +114,10 @@ When creating or updating a user, send a JSON body like this:
   "last_name": "Doe",
   "biography": "Software developer currently learning Go."
 }
-
 ```
+
+## Validation Rules
+
+- `first_name`: 2 to 20 characters
+- `last_name`: 2 to 20 characters
+- `biography`: 20 to 450 characters
